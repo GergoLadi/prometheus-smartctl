@@ -193,6 +193,13 @@ def collect():
                 # Update metric
                 metric_val = values[1] if typ in SAT_TYPES else values
 
+                # Fix Raw Read Error Rate and Seek Error Rate values for Seagate drives
+                # For more information, see http://sgros.blogspot.com/2013/01/seagate-disk-smart-values.html or 
+                # https://superuser.com/questions/1675004/seek-error-rate-correlation-between-normalized-and-raw-smart-value-seagate-hdd
+                if (drive_attrs['model_family'].startswith('Seagate ') and
+                   (metric == "smartprom_raw_read_error_rate_raw" or metric == "smartprom_seek_error_rate_raw")):
+                    metric_val = metric_val >> 32
+
                 METRICS[metric].labels(drive=drive,
                                        type=typ,
                                        model_family=drive_attrs['model_family'],
